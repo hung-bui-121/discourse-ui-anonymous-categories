@@ -1,0 +1,4 @@
+vi:
+  site_settings:
+    ui_anonymous_categories_enabled: "Bật che tác giả trên giao diện web. Không bảo vệ danh tính qua API."
+    ui_anonymous_category_ids: "Category cần ẩn danh. Chọn thêm từng category con nếu cần. Áp dụng cho cả bài cũ và bài mới."

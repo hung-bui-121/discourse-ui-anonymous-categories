@@ -1,0 +1,4 @@
+en:
+  site_settings:
+    ui_anonymous_categories_enabled: "Enable author masking in the web UI. This is not a privacy or API protection feature."
+    ui_anonymous_category_ids: "Categories to mask. Add subcategories explicitly. Applies to existing and future posts."

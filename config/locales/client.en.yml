@@ -1,0 +1,8 @@
+en:
+  js:
+    ui_anonymous_categories:
+      author: "Anonymous #%{number}"
+      generic_author: "Anonymous"
+      avatar: "Anonymous avatar"
+      op: "OP"
+      quote: "Quote"

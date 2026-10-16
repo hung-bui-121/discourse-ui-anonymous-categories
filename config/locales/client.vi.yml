@@ -1,0 +1,8 @@
+vi:
+  js:
+    ui_anonymous_categories:
+      author: "Người ẩn danh #%{number}"
+      generic_author: "Người ẩn danh"
+      avatar: "Avatar ẩn danh"
+      op: "Chủ thớt"
+      quote: "Trích dẫn"

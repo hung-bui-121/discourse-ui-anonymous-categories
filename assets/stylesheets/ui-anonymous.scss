@@ -1,0 +1,98 @@
+.ui-anonymous-name {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.ui-anonymous-op {
+  display: inline-block;
+  margin-inline-start: 0.5em;
+  padding: 0.1em 0.45em;
+  border-radius: 4px;
+  color: var(--tertiary);
+  background: var(--tertiary-low);
+  font-size: var(--font-down-1);
+}
+
+.ui-anonymous-avatar {
+  display: inline-flex;
+  width: 45px;
+  height: 45px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--primary-medium);
+  background: var(--primary-low);
+
+  svg {
+    width: 34px;
+    height: 34px;
+    fill: currentColor;
+  }
+}
+
+.mobile-view .ui-anonymous-avatar {
+  width: 40px;
+  height: 40px;
+}
+
+// Keep the column width/alignment, but remove avatars, profile links and
+// their hover titles. No data/model shared with other categories is changed.
+.ui-anonymous-topic-row {
+  .posters > *,
+  .topic-poster,
+  .topic-list-item__poster,
+  .creator,
+  .last-poster {
+    display: none !important;
+  }
+}
+
+// These core notices may include the real author or editor's name.
+.ui-anonymous-post {
+  .post-notice,
+  .user-signature,
+  .user-status-message-wrap,
+  .post-avatar-flair,
+  .edits {
+    display: none !important;
+  }
+}
+
+// Preserve the quote body and expand controls, suppress the author header.
+// Quoted usernames remain in raw/HTML/API by design (UI masking only).
+.ui-anonymous-cooked aside.quote .title {
+  font-size: 0 !important;
+
+  img,
+  a,
+  .username,
+  .name,
+  .quote-title__text {
+    display: none !important;
+  }
+
+  &::before {
+    content: attr(data-ui-anonymous-label);
+    color: var(--primary-medium);
+    font-size: var(--font-0);
+  }
+
+  .quote-controls {
+    font-size: var(--font-0);
+  }
+}
+
+.ui-anonymous-topic-page {
+  .topic-map [data-user-card],
+  .topic-map a[href*="/u/"],
+  .topic-map .avatar,
+  .topic-map .avatars,
+  .topic-map .participants,
+  .topic-map .created-by,
+  .topic-map .last-reply,
+  .topic-map__users,
+  .topic-participants,
+  .topic-footer-main-buttons .invite-topic {
+    display: none !important;
+  }
+}

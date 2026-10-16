@@ -1,0 +1,8 @@
+plugins:
+  ui_anonymous_categories_enabled:
+    default: true
+    client: true
+  ui_anonymous_category_ids:
+    default: ""
+    type: category_list
+    client: true
