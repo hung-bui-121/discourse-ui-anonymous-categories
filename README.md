@@ -1,46 +1,60 @@
 # Discourse UI Anonymous Categories
 
-Plugin 0.1.0 — hiển thị ẩn danh trong category được chọn, giữ nguyên tài khoản thật.
+Plugin 0.2.0 — shows authors anonymously in selected categories while keeping
+the real accounts untouched.
 
-## Bật tính năng
+## Enabling
 
-1. Tạo category như bình thường, ví dụ **Confessions**.
-2. Cài plugin và khởi động lại/rebuild Discourse.
-3. Vào **Admin → Settings**, tìm `ui_anonymous`.
-4. Bật `ui_anonymous_categories_enabled` và chọn category tại `ui_anonymous_category_ids`.
-5. Reload trình duyệt. Category con cần được chọn riêng.
+1. Create a category as usual, e.g. **Confessions**.
+2. Install the plugin and restart/rebuild Discourse.
+3. Go to **Admin → Settings** and search for `ui_anonymous`.
+4. Enable `ui_anonymous_categories_enabled` and pick categories in
+   `ui_anonymous_category_ids`.
+5. Reload the browser. Subcategories must be selected individually.
 
-Không cần bật Anonymous Mode của Discourse. Không nên bật đồng thời một plugin
-khác chuyển tác giả thật thành tài khoản anonymous trong cùng category.
+Discourse's built-in Anonymous Mode is not required. Do not combine this with
+another plugin that reassigns real authors to anonymous accounts in the same
+category.
 
-## Hành vi
+## Behavior
 
-- Áp dụng cho topic mới, reply và bài cũ. Không sửa tác giả trong database.
-- Header tác giả dùng avatar chung, không có liên kết profile/user card,
-  không có title/badge/flair của tài khoản. Admin cũng thấy cùng giao diện.
-- Tác giả topic có nhãn **Chủ thớt / OP**.
-- Một người giữ cùng số trong một topic. Số = số thứ tự bài đầu tiên của
-  người đó trong topic: A viết bài #1 và #3 → đều là Người ẩn danh #1;
-  B viết bài #2 → Người ẩn danh #2. Vì vậy số có thể không liên tiếp.
-- Số được tính độc lập ở từng topic, có thể ngẫu nhiên trùng giữa các topic.
-  Không dùng số này làm định danh xuyên forum.
-- Tên/avatar tại reply-to được thay thế, nút mở bài được reply vẫn hoạt động.
-- Header quote hiện “Trích dẫn”; nội dung quote giữ nguyên.
-- Danh sách topic chuẩn che người đăng; summary chuẩn che các khối participant.
-- Sửa/xóa/like/flag vẫn do Discourse xử lý bằng tài khoản thật.
-- Bỏ chọn category hoặc tắt plugin rồi reload sẽ hiện lại thông tin thật.
-- Không tạo bảng mới, không migration, không tạo tài khoản giả.
+- Applies to new topics, replies and existing posts. Authors in the database
+  are never changed.
+- The post author header uses a shared avatar, with no profile link/user card
+  and no account title/badge/flair. Admins see the same UI.
+- The topic author gets an **OP** label.
+- A person keeps the same number within a topic. The number is the post number
+  of that person's first regular (or moderator-action) post in the topic: A
+  writes posts #1 and #3 → both are Anonymous #1; B writes post #2 →
+  Anonymous #2. Numbers can therefore be non-consecutive. Whispers and small
+  actions (closed, pinned, ...) do not affect numbering.
+- Numbers are computed per topic and may coincide across topics. Do not use
+  them as a forum-wide identifier.
+- The reply-to name/avatar is replaced; the button that expands the parent post
+  still works, and embedded parent/reply posts are masked too.
+- The composer header when replying to or editing a masked post shows the
+  pseudonym and a default avatar, including the "Reply to a post by …" entry
+  in the composer actions menu.
+- Small action posts hide the acting user's avatar.
+- Quote headers show "Quote"; the quote body is kept as is.
+- Standard topic lists (including the latest list on /categories) hide posters;
+  the topic map hides participants and the authors of most-liked replies,
+  including the mobile pop-ups.
+- Screen-reader labels of masked posts (post heading, embedded replies) use
+  the pseudonym.
+- The core highlight of moderator-action posts is removed so it does not reveal
+  staff authorship.
+- Edit/delete/like/flag are still handled by Discourse with the real account.
+- Unselecting a category or disabling the plugin and reloading shows the real
+  information again.
+- No new tables, no migrations, no fake accounts.
 
-## Cài đặt self-hosted
+## Self-hosted installation
 
-Không upload ZIP qua trang Themes — đây là **server plugin**.
+Do not upload a ZIP via the Themes page — this is a **server plugin**.
 
-### Cách khuyến nghị: repository Git của bạn
-
-Giải nén và đưa toàn bộ nội dung thư mục `discourse-ui-anonymous-categories`
-lên một repository Git mà server truy cập được. `plugin.rb` nằm ở root repo.
-Trong `/var/discourse/containers/app.yml`, thêm dòng clone vào **khối plugins
-có sẵn** (giữ nguyên các plugin hiện tại):
+Add the repository to the **existing plugins block** in
+`/var/discourse/containers/app.yml` (keep your current plugins):
 
 ```yaml
 hooks:
@@ -48,85 +62,109 @@ hooks:
     - exec:
         cd: $home/plugins
         cmd:
-          - git clone YOUR_PLUGIN_REPOSITORY_URL
+          - git clone https://github.com/hung-bui-121/discourse-ui-anonymous-categories.git
 ```
 
-`YOUR_PLUGIN_REPOSITORY_URL` là chỗ điền URL repo của bạn, chưa có repo được
-publish kèm gói này. Nếu server dùng private repo, dùng cơ chế deploy key sẵn có.
-Sau đó:
+If you host a fork in a private repository, use your usual deploy key
+mechanism. Then:
 
 ```bash
 cd /var/discourse
 ./launcher rebuild app
 ```
 
-Tên container nếu không phải `app` thì dùng tên thực tế.
+Use your actual container name if it is not `app`.
 
-### Cài thử bằng thư mục local (không dùng làm cấu hình deploy lâu dài)
+### Trying it from a local folder (not for long-term deployments)
 
-Với môi trường development/source checkout, copy thư mục plugin vào
-`DISCOURSE_SOURCE/plugins/discourse-ui-anonymous-categories`, restart server
-và frontend dev server. Đường dẫn source là checkout Discourse thật của bạn.
+For a development/source checkout, copy the plugin folder to
+`DISCOURSE_SOURCE/plugins/discourse-ui-anonymous-categories` and restart the
+server and the frontend dev server. `DISCOURSE_SOURCE` is your actual Discourse
+checkout.
 
-Discourse managed hosting chỉ cài được nếu gói hosting cho phép custom plugin.
+Discourse managed hosting can only install it if your plan allows custom plugins.
 
-## Phạm vi UI, không phải bảo vệ danh tính
+## UI scope, not identity protection
 
 JSON/API, DOM data attributes, HTML/raw/quote metadata, profile/activity,
-search, notifications, email/digest, RSS, revision history, nội dung tự gõ
-như @mention/chữ ký và danh sách người like vẫn có thể hiện tài khoản thật.
-Các plugin riêng (Reactions, Topic List Previews, signature, chat...) có thể
-có giao diện riêng cần chỉnh bổ sung. Không hứa che danh tính ở các bề mặt này.
-Theme/component khác có thể thêm tác giả ở vị trí ngoài giao diện chuẩn.
+search, notifications, email/digest, RSS, revision history, user-typed content
+such as @mentions/signatures, custom small action messages, and the list of
+users who liked a post may still reveal the real account. Quoting a post
+inserts the real username into the raw text, so the composer preview's quote
+header shows it. Plugins with their own UI (Reactions, Topic List Previews,
+signatures, chat, ...) may need extra work. No identity masking is promised on
+these surfaces. Other themes/components may render authors outside the standard
+UI.
 
-Không dùng bản này nếu cần cam kết giữ bí mật danh tính với người biết kỹ thuật.
-Di chuyển topic ra khỏi category đã chọn sẽ hiện lại tác giả sau reload.
-Soft-delete không đổi số; xóa vĩnh viễn bài đầu tiên của một tác giả có thể
-đổi số của người đó. Sau khi chuyển category hoặc đổi settings, hãy reload
-các tab đang mở để cập nhật nhất quán.
+Core adds classes such as `group-<name>`, `category-moderator` and `moderator`
+to posts; plugins cannot remove them. Core CSS does not style them visibly
+(the moderator highlight is neutralized), but a theme might.
 
-## Tương thích và kiểm tra
+Topic-map masking relies on core rendering the `topic-map-expanded-after`
+outlet; a theme that replaces the whole topic map may bypass it.
 
-Các API/outlet đã được đối chiếu với mã nguồn **Discourse v2026.1.4**:
-`post-avatar`, `post-meta-data-poster-name`, `post-meta-data-reply-to-tab-info`,
-`topic-list-item-mobile-avatar`, `topic-list-item-class`,
-`addPostClassesCallback`, `addTrackedPostProperties`, `decorateCookedElement`.
+Do not use this plugin if you need to guarantee identity confidentiality
+against technically savvy users. Moving a topic out of a selected category
+reveals its authors after a reload. Soft deletes do not change numbers;
+permanently deleting a person's first numbered post may change their number.
+After moving categories or changing settings, reload open tabs to keep the
+display consistent.
 
-Mã nguồn tham chiếu: [Discourse v2026.1.4](https://github.com/discourse/discourse/tree/v2026.1.4).
-Các phiên bản cũ hơn không thuộc mục tiêu của bản này.
+## Compatibility and testing
 
-Kiểm tra helper frontend, không cần dependencies:
+APIs/outlets were checked against the source of **Discourse v2026.1.4**:
+
+- Plugin outlets: `post-avatar`, `post-meta-data-poster-name`,
+  `post-meta-data-reply-to-tab-info`, `topic-list-item-mobile-avatar`,
+  `topic-map-expanded-after`.
+- Value transformers: `post-class`, `post-small-action-class`,
+  `topic-list-item-class`, `latest-topic-list-item-class`,
+  `composer-reply-options-user-avatar-template`,
+  `composer-reply-options-user-link-name`.
+- Plugin API: `addTrackedPostProperties`, `decorateCookedElement`,
+  `customizeComposerText`, `modifySelectKit("composer-actions")`,
+  `modifyClass("component:post")`.
+
+Reference source: [Discourse v2026.1.4](https://github.com/discourse/discourse/tree/v2026.1.4).
+Older versions are not targeted.
+
+Frontend helper tests, no dependencies needed:
 
 ```bash
 npm test
 ```
 
-Trong checkout Discourse có đầy đủ Ruby/bundle/database:
+In a Discourse checkout with Ruby/bundle/database:
 
 ```bash
 LOAD_PLUGINS=1 bundle exec rspec plugins/discourse-ui-anonymous-categories/spec
 ```
 
-Đã chạy khi tạo gói: **9/9 kiểm tra Node đạt**; cú pháp JavaScript,
-GJS/Glimmer template, Ruby và YAML hợp lệ; SCSS compile thành công.
-Kiểm tra cú pháp Ruby bằng parser, chưa chạy Ruby runtime.
+Verified for 0.2.0: **18/18 Node tests pass**; SCSS compiles; Ruby files parse;
+YAML is valid. The Rails specs are provided to run inside Discourse but have not
+been run on a real Discourse server yet. Integration and mobile/theme behavior
+have not been confirmed in a browser. Do not consider 0.2.0 production-tested.
 
-Các spec Rails được cung cấp để chạy trong Discourse; chưa chạy trên server
-Discourse thật trong môi trường tạo gói. Chưa xác nhận tích hợp/theme mobile
-bằng trình duyệt. Không coi bản 0.1.0 là đã kiểm thử production.
+### Quick check after installing
 
-### Kiểm tra nhanh sau khi cài
-
-1. Chọn category thử; dùng hai tài khoản A/B đăng topic và vài reply xen kẽ.
-2. Kiểm tra tên/avatar/Chủ thớt; bấm tên và avatar không mở user card.
-3. Reply vào bài của B; tên reply phải là bí danh, nút mở reply vẫn hoạt động.
-4. Quote một bài; header quote không còn tên/avatar thật.
-5. Xem Latest, category và mobile: không còn avatar người đăng ở các topic được chọn.
-6. Vào category khác và quay lại: hiển thị thật/ẩn danh đúng phạm vi.
-7. Thử bài cũ, bài bị soft-delete, reply mới nhận realtime, quyền sửa/xóa/flag.
-8. Thử các theme/component/plugin đang bật riêng trên forum MPS.
-9. Tắt plugin, reload: tác giả thật hiện lại và ownership giữ nguyên.
+1. Pick a test category; use two accounts A/B to post a topic and a few
+   interleaved replies.
+2. Check names/avatars/OP; clicking a name or avatar does not open a user card.
+3. Reply to B's post: the reply-to name is a pseudonym, the expand button still
+   works, and the composer header shows the pseudonym.
+4. Quote a post: the quote header no longer shows the real name/avatar.
+5. Check Latest, the category list, /categories and mobile: no poster avatars on
+   topics in selected categories.
+6. Open the topic map (desktop and mobile): no participant avatars or
+   most-liked authors.
+7. Close/pin the topic as a moderator: the small action shows no avatar.
+8. Go to another category and back: real/anonymous display matches the scope.
+9. Try old posts, soft-deleted posts, new replies arriving in realtime, and
+   edit/delete/flag permissions.
+10. Try the themes/components/plugins enabled on your forum.
+11. Disable the plugin and reload: real authors reappear and ownership is
+    unchanged.
 
 ## License
 
-MIT, xem LICENSE.
+MIT, see LICENSE.

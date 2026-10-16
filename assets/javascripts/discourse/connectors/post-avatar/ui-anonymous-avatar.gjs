@@ -1,10 +1,20 @@
 import Component from "@glimmer/component";
 import { service } from "@ember/service";
+import { modifier } from "ember-modifier";
 import { i18n } from "discourse-i18n";
-import { isAnonymousPost } from "../../lib/ui-anonymous";
+import {
+  isAnonymousPost,
+  maskEmbeddedReplyLabels,
+  pseudonym,
+} from "../../lib/ui-anonymous";
 
 export default class UiAnonymousAvatar extends Component {
   @service siteSettings;
+
+  maskReplyLabels = modifier((element) => {
+    const number = this.args.outletArgs.post.ui_anonymous_author?.number;
+    maskEmbeddedReplyLabels(element, pseudonym(number, i18n), i18n);
+  });
 
   get masked() {
     return isAnonymousPost(this.args.outletArgs.post, this.siteSettings);
@@ -12,7 +22,12 @@ export default class UiAnonymousAvatar extends Component {
 
   <template>
     {{#if this.masked}}
-      <span class="ui-anonymous-avatar" role="img" aria-label={{i18n "ui_anonymous_categories.avatar"}}>
+      <span
+        class="ui-anonymous-avatar"
+        role="img"
+        aria-label={{i18n "ui_anonymous_categories.avatar"}}
+        {{this.maskReplyLabels}}
+      >
         <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
           <circle cx="24" cy="17" r="8" />
           <path d="M9 41v-4a15 15 0 0 1 30 0v4Z" />

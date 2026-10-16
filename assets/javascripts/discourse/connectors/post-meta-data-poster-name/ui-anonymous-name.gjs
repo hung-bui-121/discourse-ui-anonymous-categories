@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { service } from "@ember/service";
 import { i18n } from "discourse-i18n";
-import { isAnonymousPost } from "../../lib/ui-anonymous";
+import { isAnonymousPost, pseudonym } from "../../lib/ui-anonymous";
 
 export default class UiAnonymousName extends Component {
   @service siteSettings;
@@ -11,10 +11,7 @@ export default class UiAnonymousName extends Component {
   }
 
   get label() {
-    const number = this.args.outletArgs.post.ui_anonymous_author?.number;
-    return number
-      ? i18n("ui_anonymous_categories.author", { number })
-      : i18n("ui_anonymous_categories.generic_author");
+    return pseudonym(this.args.outletArgs.post.ui_anonymous_author?.number, i18n);
   }
 
   get op() {

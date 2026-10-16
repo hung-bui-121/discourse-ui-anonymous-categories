@@ -39,11 +39,15 @@
 // their hover titles. No data/model shared with other categories is changed.
 .ui-anonymous-topic-row {
   .posters > *,
-  .topic-poster,
   .topic-list-item__poster,
   .creator,
   .last-poster {
     display: none !important;
+  }
+
+  // Latest list on /categories: visibility keeps the poster column.
+  .topic-poster {
+    visibility: hidden !important;
   }
 }
 
@@ -51,11 +55,20 @@
 .ui-anonymous-post {
   .post-notice,
   .user-signature,
-  .user-status-message-wrap,
   .post-avatar-flair,
   .edits {
     display: none !important;
   }
+}
+
+// Core highlights moderator-action posts, which reveals staff authorship.
+.ui-anonymous-post.moderator .regular > .cooked {
+  background-color: transparent;
+}
+
+// Small actions (closed, pinned, ...) show the acting user's avatar link.
+.small-action.ui-anonymous-post .small-action-contents > a {
+  display: none !important;
 }
 
 // Preserve the quote body and expand controls, suppress the author header.
@@ -63,16 +76,13 @@
 .ui-anonymous-cooked aside.quote .title {
   font-size: 0 !important;
 
-  img,
-  a,
-  .username,
-  .name,
-  .quote-title__text {
+  // Avatar, name and topic link; the controls' back button is an <a> too.
+  > :not(.quote-controls) {
     display: none !important;
   }
 
   &::before {
-    content: attr(data-ui-anonymous-label);
+    content: var(--ui-anonymous-quote-label, "");
     color: var(--primary-medium);
     font-size: var(--font-0);
   }
@@ -82,17 +92,13 @@
   }
 }
 
-.ui-anonymous-topic-page {
-  .topic-map [data-user-card],
-  .topic-map a[href*="/u/"],
-  .topic-map .avatar,
-  .topic-map .avatars,
-  .topic-map .participants,
-  .topic-map .created-by,
-  .topic-map .last-reply,
-  .topic-map__users,
-  .topic-participants,
-  .topic-footer-main-buttons .invite-topic {
+// Topic map participants and most-liked authors. Scoped on the body because
+// mobile opens these float-kit menus as a modal outside the map.
+body.ui-anonymous-topic-page {
+  .topic-map__users-trigger,
+  .topic-map__users-content,
+  .topic-map__users-list,
+  .topic-map__likes-content .like-section__user {
     display: none !important;
   }
 }

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  categoryIds, isAnonymousCategory, isAnonymousPost, withAnonymousClass,
+  categoryIds, isAnonymousCategory, isAnonymousPost, maskEmbeddedReplyLabels, pseudonym, withAnonymousClass,
 } from "../../assets/javascripts/discourse/lib/ui-anonymous.js";
 
 const settings = {
@@ -46,4 +46,49 @@ test("class transformer preserves other plugins' classes without mutation", () =
   assert.deepEqual(original, ["pinned", "custom"]);
   assert.equal(withAnonymousClass(original, false, "anonymous"), original);
   assert.deepEqual(withAnonymousClass(undefined, true, "anonymous"), ["anonymous"]);
+});
+
+test("category ids are memoized on the raw setting value", () => {
+  const ids = categoryIds(settings);
+  assert.equal(categoryIds({ ...settings }), ids);
+  const changed = categoryIds({ ui_anonymous_category_ids: "4|13" });
+  assert.notEqual(changed, ids);
+  assert.deepEqual([...changed], [4, 13]);
+  assert.equal(categoryIds({ ui_anonymous_category_ids: [4, 13] }), changed);
+});
+
+test("pseudonym falls back to the generic label without a number", () => {
+  const t = (key, opts) => `${key}:${opts?.number ?? ""}`;
+  assert.equal(pseudonym(2, t), "ui_anonymous_categories.author:2");
+  assert.equal(pseudonym(undefined, t), "ui_anonymous_categories.generic_author:");
+});
+
+function fakeReply({ isReply = true, region = true } = {}) {
+  const attrs = {};
+  const link = { setAttribute: (k, v) => (attrs.link = v) };
+  const reply = {
+    classList: { contains: (c) => isReply && c === "reply" },
+    getAttribute: (k) => (k === "role" && region ? "region" : null),
+    setAttribute: (k, v) => (attrs[k] = v),
+    closest: () => ({ dataset: { postNumber: "7" } }),
+    querySelector: () => link,
+  };
+  const avatar = { closest: () => ({ parentElement: { parentElement: reply } }) };
+  return { avatar, attrs };
+}
+
+test("embedded reply aria-labels use the pseudonym, main posts are untouched", () => {
+  const t = (key, opts) => `${key}${JSON.stringify(opts)}`;
+  const { avatar, attrs } = fakeReply();
+  maskEmbeddedReplyLabels(avatar, "Anonymous #3", t);
+  assert.equal(attrs["aria-label"], t("post.sr_embedded_reply_description", { post_number: "7", username: "Anonymous #3" }));
+  assert.equal(attrs.link, t("topic.jump_reply_aria", { username: "Anonymous #3" }));
+
+  const above = fakeReply({ region: false });
+  maskEmbeddedReplyLabels(above.avatar, "Anonymous #3", t);
+  assert.deepEqual(Object.keys(above.attrs), ["link"]);
+
+  const main = fakeReply({ isReply: false });
+  maskEmbeddedReplyLabels(main.avatar, "Anonymous #3", t);
+  assert.deepEqual(main.attrs, {});
 });

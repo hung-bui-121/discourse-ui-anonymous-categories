@@ -2,7 +2,7 @@
 
 # name: discourse-ui-anonymous-categories
 # about: Per-topic pseudonyms in selected categories, for the web UI only.
-# version: 0.1.0
+# version: 0.2.0
 # authors: MPS
 # required_version: 2026.1.4
 
