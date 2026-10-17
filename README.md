@@ -1,6 +1,6 @@
 # Discourse UI Anonymous Categories
 
-Plugin 0.2.0 — shows authors anonymously in selected categories while keeping
+Plugin 0.2.1 — shows authors anonymously in selected categories while keeping
 the real accounts untouched.
 
 ## Enabling
@@ -36,7 +36,15 @@ category.
   pseudonym and a default avatar, including the "Reply to a post by …" entry
   in the composer actions menu.
 - Small action posts hide the acting user's avatar.
-- Quote headers show "Quote"; the quote body is kept as is.
+- Quoting a masked post inserts the pseudonym instead of the real name into
+  the raw text (`[quote="Anonymous #2, post:2, topic:123"]`), so the editor,
+  the preview (which also uses the default avatar) and the saved post never
+  contain it. Quoting a nested quote inside a masked post uses the generic
+  "Anonymous". Trade-offs: the real author gets no "quoted you" notification,
+  and when quoting into another topic the number refers to the source topic.
+- Quote headers in masked posts show "Quote"; the quote body is kept as is.
+  This also covers posts that quoted real names before 0.2.1, whose raw still
+  contains them.
 - Standard topic lists (including the latest list on /categories) hide posters;
   the topic map hides participants and the authors of most-liked replies,
   including the mobile pop-ups.
@@ -89,9 +97,7 @@ Discourse managed hosting can only install it if your plan allows custom plugins
 JSON/API, DOM data attributes, HTML/raw/quote metadata, profile/activity,
 search, notifications, email/digest, RSS, revision history, user-typed content
 such as @mentions/signatures, custom small action messages, and the list of
-users who liked a post may still reveal the real account. Quoting a post
-inserts the real username into the raw text, so the composer preview's quote
-header shows it. Plugins with their own UI (Reactions, Topic List Previews,
+users who liked a post may still reveal the real account. Plugins with their own UI (Reactions, Topic List Previews,
 signatures, chat, ...) may need extra work. No identity masking is promised on
 these surfaces. Other themes/components may render authors outside the standard
 UI.
@@ -120,7 +126,8 @@ APIs/outlets were checked against the source of **Discourse v2026.1.4**:
 - Value transformers: `post-class`, `post-small-action-class`,
   `topic-list-item-class`, `latest-topic-list-item-class`,
   `composer-reply-options-user-avatar-template`,
-  `composer-reply-options-user-link-name`.
+  `composer-reply-options-user-link-name`, `quote-params`,
+  `composer-editor-quoted-post-avatar-template`.
 - Plugin API: `addTrackedPostProperties`, `decorateCookedElement`,
   `customizeComposerText`, `modifySelectKit("composer-actions")`,
   `modifyClass("component:post")`.
@@ -140,10 +147,10 @@ In a Discourse checkout with Ruby/bundle/database:
 LOAD_PLUGINS=1 bundle exec rspec plugins/discourse-ui-anonymous-categories/spec
 ```
 
-Verified for 0.2.0: **18/18 Node tests pass**; SCSS compiles; Ruby files parse;
+Verified for 0.2.1: **19/19 Node tests pass**; SCSS compiles; Ruby files parse;
 YAML is valid. The Rails specs are provided to run inside Discourse but have not
 been run on a real Discourse server yet. Integration and mobile/theme behavior
-have not been confirmed in a browser. Do not consider 0.2.0 production-tested.
+have not been confirmed in a browser. Do not consider 0.2.1 production-tested.
 
 ### Quick check after installing
 
@@ -152,7 +159,9 @@ have not been confirmed in a browser. Do not consider 0.2.0 production-tested.
 2. Check names/avatars/OP; clicking a name or avatar does not open a user card.
 3. Reply to B's post: the reply-to name is a pseudonym, the expand button still
    works, and the composer header shows the pseudonym.
-4. Quote a post: the quote header no longer shows the real name/avatar.
+4. Quote a post (text selection and full-post quote): the composer raw and
+   preview show the pseudonym and default avatar; after posting, the quote
+   header no longer shows the real name/avatar.
 5. Check Latest, the category list, /categories and mobile: no poster avatars on
    topics in selected categories.
 6. Open the topic map (desktop and mobile): no participant avatars or

@@ -31,6 +31,24 @@ export default apiInitializer((api) => {
     ({ value, context }) => (masked(context.post) ? label(context.post) : value)
   );
 
+  // Quote BBCode [quote="name, post:N, topic:N(, username:x)"]: put the
+  // pseudonym in the raw, so the editor, preview and saved post never contain
+  // the real name. Quoting a nested quote (opts.username) refers to another
+  // author, so it gets the generic label.
+  api.registerValueTransformer("quote-params", ({ value, context }) => {
+    const { post, opts } = context;
+    if (!masked(post)) {
+      return value;
+    }
+    const nested = opts?.username && opts.username !== post.username;
+    const name = nested ? pseudonym(null, i18n) : label(post);
+    return [name, ...value.slice(1).filter((param) => !String(param).startsWith("username:"))];
+  });
+  api.registerValueTransformer(
+    "composer-editor-quoted-post-avatar-template",
+    ({ value, context }) => (masked(context.post) ? MASKED_AVATAR_TEMPLATE : value)
+  );
+
   // Desktop edit title also shows the replied-to user (replyOptions.originalUser),
   // which has no transformer. Same markup as core, masked.
   api.customizeComposerText({

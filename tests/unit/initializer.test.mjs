@@ -113,6 +113,26 @@ test("composer reply header masks the replied-to avatar and name", () => {
   assert.equal(name({ value: "Bob", context: { post: plain } }), "Bob");
 });
 
+test("quote BBCode and preview avatar use the pseudonym", () => {
+  const { transformers } = harness("composer");
+  const params = transformers["quote-params"];
+  const post = { ...masked, username: "realbob" };
+  const value = ["Real Bob", "post:5", "topic:9", "full:true", "username:realbob"];
+  assert.deepEqual(params({ value, context: { post, opts: {} } }), [
+    i18n("ui_anonymous_categories.author", { number: 3 }), "post:5", "topic:9", "full:true",
+  ]);
+  assert.deepEqual(params({ value, context: { post, opts: { username: "realbob" } } })[0], i18n("ui_anonymous_categories.author", { number: 3 }));
+  // Nested quote of another author inside the masked post.
+  assert.deepEqual(params({ value: ["carol", "post:2", "topic:7"], context: { post, opts: { username: "carol" } } }), [
+    "ui_anonymous_categories.generic_author", "post:2", "topic:7",
+  ]);
+  assert.equal(params({ value, context: { post: plain, opts: {} } }), value);
+
+  const avatar = transformers["composer-editor-quoted-post-avatar-template"];
+  assert.equal(avatar({ value: "/real", context: { post: masked } }), "/images/avatar.png");
+  assert.equal(avatar({ value: "/real", context: { post: plain } }), "/real");
+});
+
 test("desktop edit title masks the replied-to user", () => {
   const { composerText } = harness("composer");
   const replyOptions = {

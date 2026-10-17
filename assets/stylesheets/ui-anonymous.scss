@@ -72,7 +72,7 @@
 }
 
 // Preserve the quote body and expand controls, suppress the author header.
-// Quoted usernames remain in raw/HTML/API by design (UI masking only).
+// Needed for quotes made before 0.2.1 (real name in raw) and for the avatar.
 .ui-anonymous-cooked aside.quote .title {
   font-size: 0 !important;
 
